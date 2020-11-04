@@ -26,9 +26,9 @@ type OperationMultile<T> = (
 ) => Optional<RunOperationOutput>;
 
 interface TargetLocation {
-  section: number;
-  row: number;
-  column: number;
+  readonly section: number;
+  readonly row: number;
+  readonly column: number;
 }
 
 const checkOld = (

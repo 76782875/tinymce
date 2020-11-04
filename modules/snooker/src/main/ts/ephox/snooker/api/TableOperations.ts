@@ -1,4 +1,4 @@
-import { Arr, Fun, Optional, Type } from '@ephox/katamari';
+import { Arr, Fun, Optional } from '@ephox/katamari';
 import { Remove, SugarElement, SugarNode } from '@ephox/sugar';
 import * as DetailsList from '../model/DetailsList';
 import * as GridRow from '../model/GridRow';
@@ -157,10 +157,7 @@ const opMakeRowsHeader = function (initialGrid: Structs.RowCells[], details: Str
     TransformOperations.replaceRow(currentGrid, row.row, comparator, genWrappers.replaceOrInit),
   initialGrid);
 
-  const first = details[0];
-  const hasFirst = Type.isObject(first);
-
-  return bundle(newGrid, hasFirst ? first.row : 0, hasFirst ? first.column : 0);
+  return bundle(newGrid, details[0].row, details[0].column);
 };
 
 const opMakeColumnHeader = function (initialGrid: Structs.RowCells[], detail: Structs.DetailExt, comparator: CompElm, genWrappers: GeneratorsTransform) {
@@ -176,10 +173,7 @@ const opMakeColumnsHeader = function (initialGrid: Structs.RowCells[], details: 
     TransformOperations.replaceColumn(currentGrid, column.column, comparator, genWrappers.replaceOrInit),
   initialGrid);
 
-  const first = details[0];
-  const hasFirst = Type.isObject(first);
-
-  return bundle(newGrid, hasFirst ? first.row : 0, hasFirst ? first.column : 0);
+  return bundle(newGrid, details[0].row, details[0].column);
 };
 
 const opUnmakeRowHeader = function (grid: Structs.RowCells[], detail: Structs.DetailExt, comparator: CompElm, genWrappers: GeneratorsTransform) {
@@ -195,10 +189,7 @@ const opUnmakeRowsHeader = function (initialGrid: Structs.RowCells[], details: S
     TransformOperations.replaceRow(currentGrid, row.row, comparator, genWrappers.replaceOrInit),
   initialGrid);
 
-  const first = details[0];
-  const hasFirst = Type.isObject(first);
-
-  return bundle(newGrid, hasFirst ? first.row : 0, hasFirst ? first.column : 0);
+  return bundle(newGrid, details[0].row, details[0].column);
 };
 
 const opUnmakeColumnHeader = function (initialGrid: Structs.RowCells[], detail: Structs.DetailExt, comparator: CompElm, genWrappers: GeneratorsTransform) {
@@ -214,10 +205,7 @@ const opUnmakeColumnsHeader = function (initialGrid: Structs.RowCells[], details
     TransformOperations.replaceColumn(currentGrid, column.column, comparator, genWrappers.replaceOrInit),
   initialGrid);
 
-  const first = details[0];
-  const hasFirst = Type.isObject(first);
-
-  return bundle(newGrid, hasFirst ? first.row : 0, hasFirst ? first.column : 0);
+  return bundle(newGrid, details[0].row, details[0].column);
 };
 
 const opSplitCellIntoColumns = function (grid: Structs.RowCells[], detail: Structs.DetailExt, comparator: CompElm, genWrappers: GeneratorsModification) {
