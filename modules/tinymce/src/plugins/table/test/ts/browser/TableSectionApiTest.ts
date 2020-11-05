@@ -173,7 +173,7 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
       ApiChains.cAssertContent(expectedContent)
     ]));
 
-  const cSwitchMultipleColumnsType = (startContent: string, expectedContent: string, command: string, type: string) =>
+  const cSwitchMultipleColumnsType = (startContent: string, expectedContent: string, command: string, type: 'td' | 'th') =>
     Log.chain('TINY-6326', `Switch to ${type}, command = ${command}`, Chain.fromParent(Chain.identity, [
       ApiChains.cSetContent(startContent),
       Chain.op((editor: Editor) => {
