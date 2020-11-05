@@ -106,6 +106,19 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
 </tbody>
 </table>`;
 
+  const bodyMultipleChangesColumnContent = `<table>
+<tbody>
+<tr>
+<td>text</td>
+<td>text</td>
+</tr>
+<tr>
+<td>text</td>
+<td>text</td>
+</tr>
+</tbody>
+</table>`;
+
   const headerColumnContent = `<table>
 <tbody>
 <tr id="one">
@@ -115,6 +128,19 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
 <tr id="two">
 <th scope="row">text</th>
 <td>text</td>
+</tr>
+</tbody>
+</table>`;
+
+  const headerMultipleChangesColumnContent = `<table>
+<tbody>
+<tr>
+<th scope="row">text</th>
+<th scope="row">text</th>
+</tr>
+<tr>
+<th scope="row">text</th>
+<th scope="row">text</th>
 </tr>
 </tbody>
 </table>`;
@@ -130,12 +156,37 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
 </tbody>
 </table>`;
 
+  const selectRangeXY = (editor: Editor, startTd, endTd) => {
+    editor.fire('mousedown', { target: startTd, button: 0 } as MouseEvent);
+    editor.fire('mouseover', { target: endTd, button: 0 } as MouseEvent);
+    editor.fire('mouseup', { target: endTd, button: 0 } as MouseEvent);
+  };
+
   const cSwitchType = (startContent: string, expectedContent: string, command: string, type: string, selector = 'tr#one td') =>
     Log.chain('TINY-6150', `Switch to ${type}, command = ${command}`, Chain.fromParent(Chain.identity, [
       ApiChains.cSetContent(startContent),
       Chain.op((editor: Editor) => {
         const row = UiFinder.findIn(SugarElement.fromDom(editor.getBody()), selector).getOrDie();
         editor.selection.select(row.dom);
+        editor.execCommand(command, false, { type });
+      }),
+      ApiChains.cAssertContent(expectedContent)
+    ]));
+
+  const cSwitchMultipleColumnsType = (startContent: string, expectedContent: string, command: string, type: string) =>
+    Log.chain('TINY-6326', `Switch to ${type}, command = ${command}`, Chain.fromParent(Chain.identity, [
+      ApiChains.cSetContent(startContent),
+      Chain.op((editor: Editor) => {
+        const searchingForType = type === 'th' ? 'td' : 'th';
+
+        const getCells = (table): HTMLTableCellElement[] =>
+          editor.$(table).find(searchingForType).toArray();
+
+        const table = editor.$('table')[0];
+        const cells = getCells(table);
+
+        selectRangeXY(editor, cells[0], cells[cells.length - 1]);
+
         editor.execCommand(command, false, { type });
       }),
       ApiChains.cAssertContent(expectedContent)
@@ -188,7 +239,9 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
         cSwitchType(tfootContent, theadContent, 'mceTableRowType', 'header'),
         // Basic tests to switch between column section types
         cSwitchType(bodyColumnContent, headerColumnContent, 'mceTableColType', 'th'),
+        cSwitchMultipleColumnsType(bodyMultipleChangesColumnContent, headerMultipleChangesColumnContent, 'mceTableColType', 'th'),
         cSwitchType(headerColumnContent, bodyColumnContent, 'mceTableColType', 'td', 'tr#one th'),
+        cSwitchMultipleColumnsType(headerMultipleChangesColumnContent, bodyMultipleChangesColumnContent, 'mceTableColType', 'td'),
         // Basic tests to switch between cell section types
         cSwitchType(bodyContent, headerCellContent, 'mceTableCellType', 'th'),
         cSwitchType(headerCellContent, bodyContent, 'mceTableCellType', 'td', 'tr#one th'),
