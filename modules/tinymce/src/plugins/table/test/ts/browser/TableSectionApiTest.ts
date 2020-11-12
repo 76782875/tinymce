@@ -1,7 +1,7 @@
 import { Chain, Log, Pipeline, UiFinder } from '@ephox/agar';
 import { Assert, UnitTest } from '@ephox/bedrock-client';
 import { ApiChains, Editor as McEditor } from '@ephox/mcagar';
-import { SugarElement } from '@ephox/sugar';
+import { Selectors, SugarElement } from '@ephox/sugar';
 import Editor from 'tinymce/core/api/Editor';
 import Plugin from 'tinymce/plugins/table/Plugin';
 import SilverTheme from 'tinymce/themes/silver/Theme';
@@ -156,7 +156,16 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
 </tbody>
 </table>`;
 
-  const selectRangeXY = (editor: Editor, startTd, endTd) => {
+  const selectAllCells = (type: 'td' | 'th') =>
+    Chain.op((editor: Editor) => {
+      const searchingForType = type === 'th' ? 'td' : 'th';
+
+      const cells = Selectors.all(searchingForType);
+
+      selectRangeXY(editor, cells[0].dom, cells[cells.length - 1].dom);
+    });
+
+  const selectRangeXY = (editor: Editor, startTd: EventTarget, endTd: EventTarget) => {
     editor.fire('mousedown', { target: startTd, button: 0 } as MouseEvent);
     editor.fire('mouseover', { target: endTd, button: 0 } as MouseEvent);
     editor.fire('mouseup', { target: endTd, button: 0 } as MouseEvent);
@@ -176,19 +185,8 @@ UnitTest.asynctest('browser.tinymce.plugins.table.TableSectionApiTest', (success
   const cSwitchMultipleColumnsType = (startContent: string, expectedContent: string, command: string, type: 'td' | 'th') =>
     Log.chain('TINY-6326', `Switch to ${type}, command = ${command}`, Chain.fromParent(Chain.identity, [
       ApiChains.cSetContent(startContent),
-      Chain.op((editor: Editor) => {
-        const searchingForType = type === 'th' ? 'td' : 'th';
-
-        const getCells = (table): HTMLTableCellElement[] =>
-          editor.$(table).find(searchingForType).toArray();
-
-        const table = editor.$('table')[0];
-        const cells = getCells(table);
-
-        selectRangeXY(editor, cells[0], cells[cells.length - 1]);
-
-        editor.execCommand(command, false, { type });
-      }),
+      selectAllCells(type),
+      ApiChains.cExecCommand(command, { type }),
       ApiChains.cAssertContent(expectedContent)
     ]));
 
